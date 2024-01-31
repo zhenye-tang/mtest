@@ -23,13 +23,21 @@ struct uint_test
 #define TO_STRINGI(x) #x
 #define STRING(s) TO_STRINGI(s)
 
+#if defined(_MSC_VER)
 #define TEST(name, desc) \
     static int _##name##desc##_entry(const char *_name, const char *_desc);\
     __declspec(allocate("Mtest$f")) \
     const struct uint_test _mtest_##name##_##desc##_ =             \
         {STRING(name), STRING(desc), _##name##desc##_entry};   \
     static int _##name##desc##_entry(const char *_name, const char *_desc)
-#pragma comment(linker, "/merge:Mtest=mytext") \
+#pragma comment(linker, "/merge:Mtest=mytext") 
+#elif defined (__GNUC__) || defined(__TI_COMPILER_VERSION__) || defined(__TASKING__)
+#define TEST(name, desc) \
+    static int _##name##desc##_entry(const char* _name, const char* _desc); \
+    __attribute((used))  const struct uint_test _mtest_##name##_##desc##_ __attribute__((section("Mtest"))) = \
+    {STRING(name), STRING(desc), _##name##desc##_entry};   \
+    static int _##name##desc##_entry(const char* _name, const char* _desc)
+#endif
 
 #define MTEST_COMPARE(ne) \
     if (!ne) {                           \
