@@ -29,7 +29,6 @@ struct uint_test
     const struct uint_test _mtest_##name##_##desc##_ =             \
         {STRING(name), STRING(desc), _##name##desc##_entry};   \
     static int _##name##desc##_entry(const char *_name, const char *_desc)
-
 #pragma comment(linker, "/merge:Mtest=mytext") \
 
 #define MTEST_COMPARE(ne) \
