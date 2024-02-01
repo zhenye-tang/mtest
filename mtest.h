@@ -105,7 +105,20 @@ struct uint_test
 #define EXPECT_END()          \
     return 0;
 
+/**
+ * @brief This function will run unit tests.
+ *
+ * @param name is the name of the test suite. If name is NULL, runs all test suites.
+ *
+ * @param count is the number of runs.
+ * 
+ * @return Return the operation status. ONLY When the return value is 0, the operation is successful.
+ */
 int mtest_run(const char *name, int count);
-int mtest_list(void);
+
+/**
+ * @brief This function will list all test cases under the test suite.
+ */
+void mtest_list(void);
 
 #endif //__MTEST_H__

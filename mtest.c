@@ -216,13 +216,14 @@ int mtest_run(const char* name, int count)
     return name ? mtest_run_suites(name, count) : mtest_run_all(count);
 }
 
-int mtest_list(void)
+void mtest_list(void)
 {
+    int i = 0;
     mtest_prepare();
     MTEST_PRINT_COLOR(BLUE, "------------------------ testcase -------------------------\n");
     MTEST_PRINT_COLOR(BLUE, "< have %d tests from %d test suites:\n", suites_cache.test_cnt, suites_cache.suites_cnt);
 
-    for (int i = 0; i < suites_cache.suites_cnt; i++)
+    for (; i < suites_cache.suites_cnt; i++)
     {
         MTEST_PRINT_COLOR(BLUE, "< %s:", suites_cache.suites[i].suites_name);
         for (int j = suites_cache.suites[i].suites_index; j < suites_cache.suites[i].suites_index + suites_cache.suites[i].test_num; j++)
@@ -232,6 +233,4 @@ int mtest_list(void)
         MTEST_PRINT_COLOR(BLUE, " >\n");
     }
     MTEST_PRINT_COLOR(BLUE, "-----------------------------------------------------------\n");
-
-    return 0;
 }
