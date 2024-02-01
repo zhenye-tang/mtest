@@ -6,35 +6,53 @@ struct uint_test
 {
     const char* name;
     const char* desc;
-    int (*test_entry)(const char *_name, const char *_desc);
+    int (*test_entry)(void);
 };
 
-#pragma section("Mtest$f",read)
+#define BLACK    "30"
+#define RED      "31"
+#define GREEN    "32"
+#define YELLOW   "33"
+#define BLUE     "34"
+#define PURPLE   "35"
+#define CYAN     "36"
+#define WHITE    "37"
 
-#define MTEST_PRINTF                printf
+#define MTEST_PRINTF                        printf
 
-#define MTEST_PRINT_OK(...)        MTEST_PRINTF("\033[32m"); \
-        MTEST_PRINTF(__VA_ARGS__); MTEST_PRINTF("\033[0m\n");
+#define MTEST_PRINT_COLOR(n, ...)           MTEST_PRINTF("\033["n"m");\
+              MTEST_PRINTF(__VA_ARGS__);    MTEST_PRINTF("\033[0m");
 
-#define MTEST_PRINT_ERROR(...)     MTEST_PRINTF("\033[31m"); \
-        MTEST_PRINTF("[%s] %s:%d", _name, __FILE__, __LINE__); \
-        MTEST_PRINTF(__VA_ARGS__); MTEST_PRINTF("\033[0m\n");
+#define MTEST_PRINT_NORMOL(...)             MTEST_PRINT_COLOR(GREEN, __VA_ARGS__)
+#define MTEST_PRINT_ERROR(...)              MTEST_PRINT_COLOR(RED, __VA_ARGS__)
 
 #define TO_STRINGI(x) #x
 #define STRING(s) TO_STRINGI(s)
 
+#if defined(_MSC_VER)
+#pragma section("Mtest$f",read)
 #define TEST(name, desc) \
     static int _##name##desc##_entry(const char *_name, const char *_desc);\
     __declspec(allocate("Mtest$f")) \
     const struct uint_test _mtest_##name##_##desc##_ =             \
-        {STRING(name), STRING(desc), _##name##desc##_entry};   \
+        { STRING(name), STRING(desc), _##name##desc##_entry };   \
     static int _##name##desc##_entry(const char *_name, const char *_desc)
-#pragma comment(linker, "/merge:Mtest=mytext") \
+#pragma comment(linker, "/merge:Mtest=mytext") 
+#elif defined (__GNUC__) || defined(__TI_COMPILER_VERSION__) || defined(__TASKING__)
+#define TEST(name, desc) \
+    static int _##name##desc##_entry(void); \
+    __attribute((used))  const struct uint_test _mtest_##name##_##desc##_ __attribute__((section("Mtest"))) = \
+    { STRING(name), STRING(desc), _##name##desc##_entry };   \
+    static int _##name##desc##_entry(void)
+#endif
 
 #define MTEST_COMPARE(ne) \
-    if (!ne) {                           \
-        MTEST_PRINT_ERROR(" Failure"); \
-    }\
+    do{ \
+        if (!ne) {                           \
+            MTEST_PRINT_ERROR("%s:%d.\n",__FILE__, __LINE__); \
+            return -1; \
+        } \
+    } while(0);
 
 #define EXPECT_STR_COMPARE(s1, s2, ne, cmp) \
     do {   \
@@ -45,42 +63,49 @@ struct uint_test
         } \
     }while(0)
 
-#define EXPECT_INTERGER_COMPARE(s1, s2, ne) \
+#define EXPECT_INTERGER_COMPARE(s1, s2, ops, ne) \
     do{ \
-        if(s1 == s2) { \
+        if(s1 ops s2) { \
             MTEST_COMPARE(ne) \
         } else { \
             MTEST_COMPARE(!ne) \
         } \
-    }while(0) \
+    }while(0)
 
 #define EXPECT_STREQ(s1, s2) \
-    EXPECT_STR_COMPARE(s1, s2, 1, strcmp) \
+    EXPECT_STR_COMPARE(s1, s2, 1, strcmp)
 
 #define EXPECT_STRNE(s1, s2) \
-    EXPECT_STR_COMPARE(s1, s2, 0, strcmp) \
+    EXPECT_STR_COMPARE(s1, s2, 0, strcmp)
 
 #define EXPECT_STRCASEEQ(s1, s2) \
-    EXPECT_STR_COMPARE(s1, s2, 1, strcasecmp) \
+    EXPECT_STR_COMPARE(s1, s2, 1, strcasecmp)
 
 #define EXPECT_STRCASENE(s1, s2) \
-    EXPECT_STR_COMPARE(s1, s2, 0, strcasecmp) \
+    EXPECT_STR_COMPARE(s1, s2, 0, strcasecmp)
 
 #define EXPECT_EQ(val1, val2) \
-    EXPECT_INTERGER_COMPARE(val1, val2, 1);
+    EXPECT_INTERGER_COMPARE(val1, val2, ==, 1);
 
 #define EXPECT_NE(val1, val2) \
-    EXPECT_INTERGER_COMPARE(val1, val2, 0);
+    EXPECT_INTERGER_COMPARE(val1, val2, ==, 0);
 
 #define EXPECT_LE(val1, val2) \
+    EXPECT_INTERGER_COMPARE(val1, val2, <=, 1);
 
 #define EXPECT_LT(val1, val2) \
+    EXPECT_INTERGER_COMPARE(val1, val2, <, 1);
 
 #define EXPECT_GE(val1, val2) \
+    EXPECT_INTERGER_COMPARE(val1, val2, >=, 1);
 
 #define EXPECT_GT(val1, val2) \
+    EXPECT_INTERGER_COMPARE(val1, val2, >, 1);
 
 #define EXPECT_END()          \
     return 0;
+
+int mtest_run(const char *name, int count);
+int mtest_list(void);
 
 #endif //__MTEST_H__
