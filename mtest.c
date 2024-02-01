@@ -37,7 +37,7 @@ struct test_suites
     int test_num;
 };
 
-struct test_suites_record
+struct test_suites_cache
 {
     struct test_suites* suites;
     int suites_cnt;
@@ -60,8 +60,8 @@ typedef int (*iterator_call)(const struct uint_test* item);
 
 static const struct uint_test* mtest_begin_object;
 static const struct uint_test* mtest_end_object;
-static struct test_suites_record suites_record;
-static struct uint_test_cache cache;
+static struct test_suites_cache suites_cache;
+static struct uint_test_cache tests_cache;
 
 static const struct uint_test* mtest_next(const struct uint_test* ut)
 {
@@ -82,30 +82,30 @@ static void mtest_section_iterator(const struct uint_test* begin, const struct u
     }
 }
 
-static int mtest_record_test_suites(const struct uint_test* item)
+static int mtest_cache_test_suites(const struct uint_test* item)
 {
     static const struct uint_test* last_item = NULL;
     static int suites_index = 0, cur_index = 0;
     if (last_item == NULL)
     {
-        suites_record.suites[0].test_num = 1;
-        suites_record.suites[0].suites_name = item->name;
-        suites_record.suites[0].suites_index = 0;
-        suites_record.suites_cnt = 1;
+        suites_cache.suites[0].test_num = 1;
+        suites_cache.suites[0].suites_name = item->name;
+        suites_cache.suites[0].suites_index = 0;
+        suites_cache.suites_cnt = 1;
     }
     else if (!strcmp(last_item->name, item->name))
     {
-        suites_record.suites[suites_index].test_num++;
+        suites_cache.suites[suites_index].test_num++;
     }
     else
     {
         suites_index += 1;
-        suites_record.suites[suites_index].test_num = 1;
-        suites_record.suites[suites_index].suites_name = item->name;
-        suites_record.suites[suites_index].suites_index = cur_index;
-        suites_record.suites_cnt++;
+        suites_cache.suites[suites_index].test_num = 1;
+        suites_cache.suites[suites_index].suites_name = item->name;
+        suites_cache.suites[suites_index].suites_index = cur_index;
+        suites_cache.suites_cnt++;
     }
-    cache.test[cur_index] = item;
+    tests_cache.test[cur_index] = item;
 
     cur_index++;
     last_item = item;
@@ -113,21 +113,16 @@ static int mtest_record_test_suites(const struct uint_test* item)
     return 0;
 }
 
-static int mtest_object_count(const struct uint_test* item)
+static int mtest_cache_tests(const struct uint_test* item)
 {
     static const struct uint_test* last_item = NULL;
     if (last_item == NULL)
-    {
-        suites_record.suites_cnt = 1;
-    }
+        suites_cache.suites_cnt = 1;
     else if (strcmp(last_item->name, item->name))
-    {
-        suites_record.suites_cnt++;
-    }
+        suites_cache.suites_cnt++;
     last_item = item;
-    cache.test_cnt++;
-    suites_record.test_cnt++;
-
+    tests_cache.test_cnt++;
+    suites_cache.test_cnt++;
     return 0;
 }
 
@@ -143,51 +138,96 @@ static void mtest_prepare(void)
     mtest_begin_object = (const struct uint_test*)&__mtest_begin;
     mtest_end_object = (const struct uint_test*)&__mtest_end;
 #endif
-    mtest_section_iterator(mtest_begin_object, mtest_end_object, mtest_object_count);
-
-    suites_record.suites = malloc(suites_record.suites_cnt * sizeof(struct test_suites));
-    cache.test = malloc(cache.test_cnt * sizeof(struct uint_test *));
-
-    if (suites_record.suites && cache.test)
-    {
-        mtest_section_iterator(mtest_begin_object, mtest_end_object, mtest_record_test_suites);
-    }
+    mtest_section_iterator(mtest_begin_object, mtest_end_object, mtest_cache_tests);
+    suites_cache.suites = malloc(suites_cache.suites_cnt * sizeof(struct test_suites));
+    tests_cache.test = malloc(tests_cache.test_cnt * sizeof(struct uint_test *));
+    if (suites_cache.suites && tests_cache.test)
+        mtest_section_iterator(mtest_begin_object, mtest_end_object, mtest_cache_test_suites);
     prepared = 1;
 }
 
 static int mtest_run_all_testcase(const struct uint_test* item)
 {
-    printf("[==========] Running %d tests from %d test suites.\n", suites_record.test_cnt, suites_record.suites_cnt);
-    printf("[----------] %d test from %s.\n", suites_record.suites[0].test_num, suites_record.suites[0].suites_name);
+    MTEST_PRINTF("[==========] Running %d tests from %d test suites.\n", suites_cache.test_cnt, suites_cache.suites_cnt);
+    MTEST_PRINTF("[----------] %d test from %s.\n", suites_cache.suites[0].test_num, suites_cache.suites[0].suites_name);
     return 0;
 }
 
-int mtest_run_all(int count)
+static int mtest_run_suites(const char *name, int count)
 {
+    int i;
+    struct test_suites* suites = NULL;
+    for(i = 0 ; i < suites_cache.suites_cnt; i++)
+    {
+        if(!strcmp(name, suites_cache.suites[i].suites_name))
+        {
+            suites = &suites_cache.suites[i];
+            break;
+        }
+    }
+
+    while(suites && count --)
+    {
+        MTEST_PRINT_NORMOL("[==========] Running %d tests from %s.\n", suites->test_num, suites->suites_name);
+        for(i = suites->suites_index; i < suites->suites_index + suites->test_num; i++)
+        {
+            MTEST_PRINT_NORMOL("[ RUN      ] %s.%s.\n", tests_cache.test[i]->name, tests_cache.test[i]->desc);
+            if(!tests_cache.test[i]->test_entry())
+            {
+                MTEST_PRINT_NORMOL("[       OK ] %s.%s. (0 ms).\n", tests_cache.test[i]->name, tests_cache.test[i]->desc);
+            }
+            else
+            {
+                MTEST_PRINT_ERROR("[  FAILED  ] %s.%s (0 ms).\n", tests_cache.test[i]->name, tests_cache.test[i]->desc);
+            }
+        }
+        MTEST_PRINT_NORMOL("[==========] Running %d tests from %s.\n", suites->test_num, suites->suites_name);
+    }
+
+    return suites ? 0 : -1;
+}
+
+static int mtest_run_all(int count)
+{
+    int i;
+    static int index = 0, end = 0;
     while(count--)
     {
-        for(int i = 0; i < cache.test_cnt; i++)
+        MTEST_PRINT_NORMOL("[==========] Running %d tests from %d test suites.\n", suites_cache.test_cnt, suites_cache.suites_cnt);
+        for(i = 0; i < suites_cache.suites_cnt; i++)
         {
-            printf("name = %s, desc = %s.\n", cache.test[i]->name, cache.test[i]->desc);
+            end += suites_cache.suites[i].test_num;
+            MTEST_PRINT_NORMOL("[----------] %d test from %s.\n", suites_cache.suites[i].test_num, suites_cache.suites[i].suites_name);
+            for(; index < end; index++)
+            {
+                MTEST_PRINT_NORMOL("[ RUN      ] %s.%s.\n", tests_cache.test[index]->name, tests_cache.test[index]->desc);
+                MTEST_PRINT_NORMOL("[       OK ] %s.%s. (0 ms).\n", tests_cache.test[index]->name, tests_cache.test[index]->desc);
+            }
+            MTEST_PRINT_NORMOL("[----------] %d tests from %s (0 ms total).\n", suites_cache.suites[i].test_num, suites_cache.suites[i].suites_name);
         }
+        end = index = 0;
     }
 
     return 0;
 }
 
+int mtest_run(const char *name, int count)
+{
+    return name ? mtest_run_suites(name, count) : mtest_run_all(count);
+}
+
 int mtest_list(void)
 { 
-    printf("have %d tests from %d test suites:\n", suites_record.test_cnt, suites_record.suites_cnt);
+    MTEST_PRINT_COLOR(BLUE, "have %d tests from %d test suites:\n", suites_cache.test_cnt, suites_cache.suites_cnt);
 
-    for(int i = 0; i < suites_record.suites_cnt; i++)
+    for(int i = 0; i < suites_cache.suites_cnt; i++)
     {
-        printf("%s:", suites_record.suites[i].suites_name);
-        for(int j = suites_record.suites[i].suites_index; j < suites_record.suites[i].suites_index + suites_record.suites[i].test_num; j++)
+        MTEST_PRINT_COLOR(BLUE, "%s:", suites_cache.suites[i].suites_name);
+        for(int j = suites_cache.suites[i].suites_index; j < suites_cache.suites[i].suites_index + suites_cache.suites[i].test_num; j++)
         {
-            printf(" %s", cache.test[j]->desc);
-            cache.test[j]->test_entry(cache.test[j]->name, cache.test[j]->desc);
+            MTEST_PRINT_COLOR(BLUE, " %s", tests_cache.test[j]->desc);
         }
-        printf("\n");
+        MTEST_PRINT_COLOR(BLUE, "\n");
     }
 
     return 0;
@@ -195,30 +235,7 @@ int mtest_list(void)
 
 static int mtest_suites_iterator(const struct uint_test* ut)
 {
-    printf("name : %s desc = %s.\n", ut->name, ut->desc);
-    return 0;
-}
-
-int mtest_run_test_suites(const char *name, int count)
-{
-    struct test_suites *suites = NULL;
-    for(int i = 0 ; i < suites_record.suites_cnt; i++)
-    {
-        if(!strcmp(name, suites_record.suites[i].suites_name))
-        {
-            suites = &suites_record.suites[i];
-            break;
-        }
-    }
-
-    while(count --)
-    {
-        for(int i = suites->suites_index; i < suites->suites_index + suites->test_num; i++)
-        {
-            printf("name = %s, desc = %s.\n", cache.test[i]->name, cache.test[i]->desc);
-        }
-    }
-
+    MTEST_PRINT_NORMOL("name : %s desc = %s.\n", ut->name, ut->desc);
     return 0;
 }
 
@@ -226,12 +243,8 @@ int mtest_cmd(int argc, char** argv)
 {
     mtest_prepare();
 
-    // mtest_run_test_suites("test", 1);
-    // mtest_run_test_suites("gaga", 1);
-    // mtest_run_test_suites("haha", 1);
-
-    // mtest_run_all(2);
     mtest_list();
+    mtest_run("gaga", 1);
 
     return 0;
 }
