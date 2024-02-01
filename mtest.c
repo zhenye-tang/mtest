@@ -63,24 +63,6 @@ static const struct uint_test* mtest_end_object;
 static struct test_suites_record suites_record;
 static struct uint_test_cache cache;
 
-TEST(haha, gaga) {
-    EXPECT_STREQ("a", "b");
-    EXPECT_STRCASEEQ("b", "B");
-    EXPECT_EQ(1, 1);
-    EXPECT_EQ(1, 1);
-    EXPECT_NE(1, 2);
-    EXPECT_END();
-}
-
-TEST(test, kaka) {
-    EXPECT_STREQ("a", "b");
-    EXPECT_STRCASEEQ("b", "B");
-    EXPECT_EQ(1, 1);
-    EXPECT_EQ(1, 1);
-    EXPECT_NE(1, 2);
-    EXPECT_END();
-}
-
 static const struct uint_test* mtest_next(const struct uint_test* ut)
 {
     unsigned int* ptr;
@@ -193,15 +175,8 @@ int mtest_run_all(int count)
     return 0;
 }
 
-/*
-    have 3 tests from 2 test suites:
-    xxx: 
-    xxx:
-    xxx:
-*/
-
 int mtest_list(void)
-{
+{ 
     printf("have %d tests from %d test suites:\n", suites_record.test_cnt, suites_record.suites_cnt);
 
     for(int i = 0; i < suites_record.suites_cnt; i++)
@@ -210,6 +185,7 @@ int mtest_list(void)
         for(int j = suites_record.suites[i].suites_index; j < suites_record.suites[i].suites_index + suites_record.suites[i].test_num; j++)
         {
             printf(" %s", cache.test[j]->desc);
+            cache.test[j]->test_entry(cache.test[j]->name, cache.test[j]->desc);
         }
         printf("\n");
     }

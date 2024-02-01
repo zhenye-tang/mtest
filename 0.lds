@@ -199,13 +199,6 @@ SECTIONS
     *(.ldata .ldata.* .gnu.linkonce.l.*)
     . = ALIGN(. != 0 ? 64 / 8 : 1);
   }
-  
-  .user : {
-    . = ALIGN(4);
-    __mtest_begin = .;
-    KEEP(*(Mtest))
-    __mtest_end = .;
-  }
   . = ALIGN(64 / 8);
   _end = .; PROVIDE (end = .);
   . = DATA_SEGMENT_END (.);
