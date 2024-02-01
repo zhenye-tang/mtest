@@ -46,7 +46,7 @@ struct test_suites_cache
 
 struct mtest_commond
 {
-    const char *cmd;
+    const char* cmd;
     int (*cmd_entry)(int argc, char** argv);
 };
 
@@ -140,39 +140,32 @@ static void mtest_prepare(void)
 #endif
     mtest_section_iterator(mtest_begin_object, mtest_end_object, mtest_cache_tests);
     suites_cache.suites = malloc(suites_cache.suites_cnt * sizeof(struct test_suites));
-    tests_cache.test = malloc(tests_cache.test_cnt * sizeof(struct uint_test *));
+    tests_cache.test = malloc(tests_cache.test_cnt * sizeof(struct uint_test*));
     if (suites_cache.suites && tests_cache.test)
         mtest_section_iterator(mtest_begin_object, mtest_end_object, mtest_cache_test_suites);
     prepared = 1;
 }
 
-static int mtest_run_all_testcase(const struct uint_test* item)
-{
-    MTEST_PRINTF("[==========] Running %d tests from %d test suites.\n", suites_cache.test_cnt, suites_cache.suites_cnt);
-    MTEST_PRINTF("[----------] %d test from %s.\n", suites_cache.suites[0].test_num, suites_cache.suites[0].suites_name);
-    return 0;
-}
-
-static int mtest_run_suites(const char *name, int count)
+static int mtest_run_suites(const char* name, int count)
 {
     int i;
     struct test_suites* suites = NULL;
-    for(i = 0 ; i < suites_cache.suites_cnt; i++)
+    for (i = 0; i < suites_cache.suites_cnt; i++)
     {
-        if(!strcmp(name, suites_cache.suites[i].suites_name))
+        if (!strcmp(name, suites_cache.suites[i].suites_name))
         {
             suites = &suites_cache.suites[i];
             break;
         }
     }
 
-    while(suites && count --)
+    while (suites && count--)
     {
         MTEST_PRINT_NORMOL("[==========] Running %d tests from %s.\n", suites->test_num, suites->suites_name);
-        for(i = suites->suites_index; i < suites->suites_index + suites->test_num; i++)
+        for (i = suites->suites_index; i < suites->suites_index + suites->test_num; i++)
         {
             MTEST_PRINT_NORMOL("[ RUN      ] %s.%s.\n", tests_cache.test[i]->name, tests_cache.test[i]->desc);
-            if(!tests_cache.test[i]->test_entry())
+            if (!tests_cache.test[i]->test_entry())
             {
                 MTEST_PRINT_NORMOL("[       OK ] %s.%s. (0 ms).\n", tests_cache.test[i]->name, tests_cache.test[i]->desc);
             }
@@ -191,14 +184,14 @@ static int mtest_run_all(int count)
 {
     int i;
     static int index = 0, end = 0;
-    while(count--)
+    while (count--)
     {
         MTEST_PRINT_NORMOL("[==========] Running %d tests from %d test suites.\n", suites_cache.test_cnt, suites_cache.suites_cnt);
-        for(i = 0; i < suites_cache.suites_cnt; i++)
+        for (i = 0; i < suites_cache.suites_cnt; i++)
         {
             end += suites_cache.suites[i].test_num;
             MTEST_PRINT_NORMOL("[----------] %d test from %s.\n", suites_cache.suites[i].test_num, suites_cache.suites[i].suites_name);
-            for(; index < end; index++)
+            for (; index < end; index++)
             {
                 MTEST_PRINT_NORMOL("[ RUN      ] %s.%s.\n", tests_cache.test[index]->name, tests_cache.test[index]->desc);
                 MTEST_PRINT_NORMOL("[       OK ] %s.%s. (0 ms).\n", tests_cache.test[index]->name, tests_cache.test[index]->desc);
@@ -211,40 +204,30 @@ static int mtest_run_all(int count)
     return 0;
 }
 
-int mtest_run(const char *name, int count)
-{
-    return name ? mtest_run_suites(name, count) : mtest_run_all(count);
-}
-
-int mtest_list(void)
-{ 
-    MTEST_PRINT_COLOR(BLUE, "have %d tests from %d test suites:\n", suites_cache.test_cnt, suites_cache.suites_cnt);
-
-    for(int i = 0; i < suites_cache.suites_cnt; i++)
-    {
-        MTEST_PRINT_COLOR(BLUE, "%s:", suites_cache.suites[i].suites_name);
-        for(int j = suites_cache.suites[i].suites_index; j < suites_cache.suites[i].suites_index + suites_cache.suites[i].test_num; j++)
-        {
-            MTEST_PRINT_COLOR(BLUE, " %s", tests_cache.test[j]->desc);
-        }
-        MTEST_PRINT_COLOR(BLUE, "\n");
-    }
-
-    return 0;
-}
-
 static int mtest_suites_iterator(const struct uint_test* ut)
 {
     MTEST_PRINT_NORMOL("name : %s desc = %s.\n", ut->name, ut->desc);
     return 0;
 }
 
-int mtest_cmd(int argc, char** argv)
+int mtest_run(const char* name, int count)
 {
-    mtest_prepare();
+    return name ? mtest_run_suites(name, count) : mtest_run_all(count);
+}
 
-    mtest_list();
-    mtest_run("gaga", 1);
+int mtest_list(void)
+{
+    MTEST_PRINT_COLOR(BLUE, "have %d tests from %d test suites:\n", suites_cache.test_cnt, suites_cache.suites_cnt);
+
+    for (int i = 0; i < suites_cache.suites_cnt; i++)
+    {
+        MTEST_PRINT_COLOR(BLUE, "%s:", suites_cache.suites[i].suites_name);
+        for (int j = suites_cache.suites[i].suites_index; j < suites_cache.suites[i].suites_index + suites_cache.suites[i].test_num; j++)
+        {
+            MTEST_PRINT_COLOR(BLUE, " %s", tests_cache.test[j]->desc);
+        }
+        MTEST_PRINT_COLOR(BLUE, "\n");
+    }
 
     return 0;
 }

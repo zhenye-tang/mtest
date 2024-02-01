@@ -32,11 +32,11 @@ struct uint_test
 #if defined(_MSC_VER)
 #pragma section("Mtest$f",read)
 #define TEST(name, desc) \
-    static int _##name##desc##_entry(const char *_name, const char *_desc);\
+    static int _##name##desc##_entry(void);\
     __declspec(allocate("Mtest$f")) \
     const struct uint_test _mtest_##name##_##desc##_ =             \
         { STRING(name), STRING(desc), _##name##desc##_entry };   \
-    static int _##name##desc##_entry(const char *_name, const char *_desc)
+    static int _##name##desc##_entry(void)
 #pragma comment(linker, "/merge:Mtest=mytext") 
 #elif defined (__GNUC__) || defined(__TI_COMPILER_VERSION__) || defined(__TASKING__)
 #define TEST(name, desc) \
