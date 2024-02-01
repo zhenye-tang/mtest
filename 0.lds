@@ -160,6 +160,12 @@ SECTIONS
     *(.data .data.* .gnu.linkonce.d.*)
     SORT(CONSTRUCTORS)
   }
+  .user :{
+    . = ALIGN(4);
+    __mtest_begin = .;
+    KEEP(*(Mtest))
+    __mtest_end = .;
+  }
   .data1          : { *(.data1) }
   _edata = .; PROVIDE (edata = .);
   . = .;

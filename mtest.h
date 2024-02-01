@@ -9,8 +9,6 @@ struct uint_test
     int (*test_entry)(const char *_name, const char *_desc);
 };
 
-#pragma section("Mtest$f",read)
-
 #define MTEST_PRINTF                printf
 
 #define MTEST_PRINT_OK(...)        MTEST_PRINTF("\033[32m"); \
@@ -24,6 +22,7 @@ struct uint_test
 #define STRING(s) TO_STRINGI(s)
 
 #if defined(_MSC_VER)
+#pragma section("Mtest$f",read)
 #define TEST(name, desc) \
     static int _##name##desc##_entry(const char *_name, const char *_desc);\
     __declspec(allocate("Mtest$f")) \
@@ -90,5 +89,9 @@ struct uint_test
 
 #define EXPECT_END()          \
     return 0;
+
+int mtest_run_all(int count);
+int mtest_list(void);
+int mtest_run_test_suite(const char *name, int count);
 
 #endif //__MTEST_H__
