@@ -90,12 +90,12 @@ cd bin
 ### gcc
 在链接脚本中新增 Section，如下
 ```
-  .user :{
-    . = ALIGN(4);
-    __mtest_begin = .;
-    KEEP(*(Mtest))
-    __mtest_end = .;
-  }
+.user :{
+. = ALIGN(4);
+__mtest_begin = .;
+KEEP(*(Mtest))
+__mtest_end = .;
+}
 ```
 ### msvc
 直接加入主工程即可

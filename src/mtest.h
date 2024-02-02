@@ -26,8 +26,9 @@ struct uint_test
 #define WHITE    "37"
 
 #define MTEST_PRINTF                        printf
-#define MTEST_GET_TICK                      0
+#define MTEST_GET_TICK                      0 
 #define MTEST_MALLOC                        malloc
+#define MTEST_FREE                          free
 
 #define MTEST_PRINT_COLOR(n, ...)           MTEST_PRINTF("\033["n"m");\
               MTEST_PRINTF(__VA_ARGS__);    MTEST_PRINTF("\033[0m");

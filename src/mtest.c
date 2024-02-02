@@ -150,7 +150,17 @@ static void mtest_prepare(void)
     suites_cache.suites = MTEST_MALLOC(suites_cache.suites_cnt * sizeof(struct test_suites));
     tests_cache.test = MTEST_MALLOC(tests_cache.test_cnt * sizeof(struct uint_test*));
     if (suites_cache.suites && tests_cache.test)
+    {
+        memset(suites_cache.suites, 0, suites_cache.suites_cnt * sizeof(struct test_suites));
+        memset(tests_cache.test, 0, tests_cache.test_cnt * sizeof(struct uint_test*));
         mtest_section_iterator(mtest_begin_object, mtest_end_object, mtest_cache_test_suites);
+    }
+    else
+    {
+        MTEST_PRINT_COLOR(RED, "Mtest prepare error!!!\n");
+        MTEST_FREE(tests_cache.test);
+    }
+
     prepared = 1;
 }
 
@@ -185,10 +195,10 @@ static int mtest_run_suites(const char* name, int count)
             {
                 MTEST_PRINT_ERROR("[  FAILED  ] %s.%s (%d tick).\n", tests_cache.test[i]->name, tests_cache.test[i]->desc, comsum_ms);
             }
-            suites_cache.suites[i].comsum_ms += comsum_ms;
+            suites_cache.suites[suites->suites_index].comsum_ms += comsum_ms;
         }
-        MTEST_PRINT_NORMOL("[==========] Running %d tests from %s (%d tick total).\n", suites->test_num, suites->suites_name, suites_cache.suites[i].comsum_ms);
-        suites_cache.suites[i].comsum_ms = 0;
+        MTEST_PRINT_NORMOL("[==========] Running %d tests from %s (%d tick total).\n", suites->test_num, suites->suites_name, suites_cache.suites[suites->suites_index].comsum_ms);
+        suites_cache.suites[suites->suites_index].comsum_ms = 0;
     }
 
     return suites ? 0 : -1;
