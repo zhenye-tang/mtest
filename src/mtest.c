@@ -1,5 +1,12 @@
-﻿#include "mtest.h"
-#include <stddef.h>
+﻿/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2024-1-30      tzy          first implementation
+ */
+
+#include "mtest.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -140,8 +147,8 @@ static void mtest_prepare(void)
     mtest_end_object = (const struct uint_test*)&__mtest_end;
 #endif
     mtest_section_iterator(mtest_begin_object, mtest_end_object, mtest_cache_tests);
-    suites_cache.suites = malloc(suites_cache.suites_cnt * sizeof(struct test_suites));
-    tests_cache.test = malloc(tests_cache.test_cnt * sizeof(struct uint_test*));
+    suites_cache.suites = MTEST_MALLOC(suites_cache.suites_cnt * sizeof(struct test_suites));
+    tests_cache.test = MTEST_MALLOC(tests_cache.test_cnt * sizeof(struct uint_test*));
     if (suites_cache.suites && tests_cache.test)
         mtest_section_iterator(mtest_begin_object, mtest_end_object, mtest_cache_test_suites);
     prepared = 1;

@@ -1,6 +1,13 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2024-1-30      tzy          first implementation
+ */
+
 #ifndef __MTEST_H__
 #define __MTEST_H__
-#include <string.h>
 
 struct uint_test
 {
@@ -20,6 +27,7 @@ struct uint_test
 
 #define MTEST_PRINTF                        printf
 #define MTEST_GET_TICK                      0
+#define MTEST_MALLOC                        malloc
 
 #define MTEST_PRINT_COLOR(n, ...)           MTEST_PRINTF("\033["n"m");\
               MTEST_PRINTF(__VA_ARGS__);    MTEST_PRINTF("\033[0m");
