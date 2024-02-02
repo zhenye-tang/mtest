@@ -35,6 +35,7 @@ struct test_suites
     const char* suites_name;
     int suites_index;
     int test_num;
+    unsigned int comsum_ms;
 };
 
 struct test_suites_cache
@@ -148,7 +149,8 @@ static void mtest_prepare(void)
 
 static int mtest_run_suites(const char* name, int count)
 {
-    int i;
+    int i, res;
+    unsigned int start, comsum_ms;
     struct test_suites* suites = NULL;
     for (i = 0; i < suites_cache.suites_cnt; i++)
     {
@@ -165,16 +167,21 @@ static int mtest_run_suites(const char* name, int count)
         for (i = suites->suites_index; i < suites->suites_index + suites->test_num; i++)
         {
             MTEST_PRINT_NORMOL("[ RUN      ] %s.%s.\n", tests_cache.test[i]->name, tests_cache.test[i]->desc);
-            if (!tests_cache.test[i]->test_entry())
+            start = MTEST_GET_TICK;
+            res = tests_cache.test[i]->test_entry();
+            comsum_ms = MTEST_GET_TICK - start;
+            if (!res)
             {
-                MTEST_PRINT_NORMOL("[       OK ] %s.%s. (0 ms).\n", tests_cache.test[i]->name, tests_cache.test[i]->desc);
+                MTEST_PRINT_NORMOL("[       OK ] %s.%s. (%d tick).\n", tests_cache.test[i]->name, tests_cache.test[i]->desc, comsum_ms);
             }
             else
             {
-                MTEST_PRINT_ERROR("[  FAILED  ] %s.%s (0 ms).\n", tests_cache.test[i]->name, tests_cache.test[i]->desc);
+                MTEST_PRINT_ERROR("[  FAILED  ] %s.%s (%d tick).\n", tests_cache.test[i]->name, tests_cache.test[i]->desc, comsum_ms);
             }
+            suites_cache.suites[i].comsum_ms += comsum_ms;
         }
-        MTEST_PRINT_NORMOL("[==========] Running %d tests from %s.\n", suites->test_num, suites->suites_name);
+        MTEST_PRINT_NORMOL("[==========] Running %d tests from %s (%d tick total).\n", suites->test_num, suites->suites_name, suites_cache.suites[i].comsum_ms);
+        suites_cache.suites[i].comsum_ms = 0;
     }
 
     return suites ? 0 : -1;
@@ -182,7 +189,8 @@ static int mtest_run_suites(const char* name, int count)
 
 static int mtest_run_all(int count)
 {
-    int i;
+    int i, res;
+    unsigned int start, comsum_ms;
     static int index = 0, end = 0;
     while (count--)
     {
@@ -194,9 +202,21 @@ static int mtest_run_all(int count)
             for (; index < end; index++)
             {
                 MTEST_PRINT_NORMOL("[ RUN      ] %s.%s.\n", tests_cache.test[index]->name, tests_cache.test[index]->desc);
-                MTEST_PRINT_NORMOL("[       OK ] %s.%s. (0 ms).\n", tests_cache.test[index]->name, tests_cache.test[index]->desc);
+                start = MTEST_GET_TICK;
+                res = tests_cache.test[i]->test_entry();
+                comsum_ms = MTEST_GET_TICK - start;
+                if(!res)
+                {
+                    MTEST_PRINT_NORMOL("[       OK ] %s.%s. (%d tick).\n", tests_cache.test[index]->name, tests_cache.test[index]->desc, comsum_ms);
+                }
+                else
+                {
+                    MTEST_PRINT_ERROR("[  FAILED  ] %s.%s (%d tick).\n", tests_cache.test[i]->name, tests_cache.test[i]->desc, comsum_ms);
+                }
+                suites_cache.suites[i].comsum_ms += comsum_ms;
             }
-            MTEST_PRINT_NORMOL("[----------] %d tests from %s (0 ms total).\n", suites_cache.suites[i].test_num, suites_cache.suites[i].suites_name);
+            MTEST_PRINT_NORMOL("[----------] %d tests from %s (%d tick total).\n", suites_cache.suites[i].test_num, suites_cache.suites[i].suites_name, suites_cache.suites[i].comsum_ms);
+            suites_cache.suites[i].comsum_ms = 0;
         }
         end = index = 0;
     }

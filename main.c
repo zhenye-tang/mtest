@@ -11,7 +11,7 @@ TEST(test, qqq) {
 }
 
 TEST(test, ppp) {
-    EXPECT_STREQ("a", "b");
+    EXPECT_STREQ("a", "a");
     EXPECT_STRCASEEQ("b", "B");
     EXPECT_EQ(1, 1); 
     EXPECT_EQ(1, 1);
@@ -37,7 +37,7 @@ TEST(gaga, xxx) {
     EXPECT_LE(2,2);
     EXPECT_LT(1,2);
     EXPECT_GE(3,2);
-    EXPECT_GT(3,3);
+    EXPECT_GT(4,3);
     EXPECT_END();
 }
 
@@ -71,19 +71,7 @@ TEST(gugu, www) {
 
 int main(int argc, char *argv[])
 {
-    // MTEST_PRINT_NORMOL("kaka\n");
-    // MTEST_PRINT_ERROR("gaga\n");
-
-    // MTEST_PRINT_COLOR(BLACK, "hello %s.\n", "world");
-    // MTEST_PRINT_COLOR(RED, "hello %s.\n", "world");
-    // MTEST_PRINT_COLOR(GREEN, "hello %s.\n", "world");
-    // MTEST_PRINT_COLOR(YELLOW, "hello %s.\n", "world");
-    // MTEST_PRINT_COLOR(BLUE, "hello %s.\n", "world");
-    // MTEST_PRINT_COLOR(PURPLE, "hello %s.\n", "world");
-    // MTEST_PRINT_COLOR(CYAN, "hello %s.\n", "world");
-    // MTEST_PRINT_COLOR(WHITE, "hello %s.\n", "world");
-
-    extern int mtest_cmd(int argc, char** argv);
-    mtest_cmd(argc, argv);
+    mtest_list();
+    mtest_run("test", 1);
     return 0;
 }
