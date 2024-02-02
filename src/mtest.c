@@ -231,12 +231,6 @@ static int mtest_run_all(int count)
     return 0;
 }
 
-static int mtest_suites_iterator(const struct uint_test* ut)
-{
-    MTEST_PRINT_NORMOL("name : %s desc = %s.\n", ut->name, ut->desc);
-    return 0;
-}
-
 int mtest_run(const char* name, int count)
 {
     mtest_prepare();
