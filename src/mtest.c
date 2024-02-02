@@ -32,7 +32,7 @@ __declspec(allocate("Mtest$z")) const struct uint_test __mtest_end =
     NULL
 };
 #elif defined (__GNUC__) || defined(__TI_COMPILER_VERSION__) || defined(__TASKING__)
-/* GNU GCC Compiler and TI CCS */
+/* GNU GCC Compiler */
 extern const int __mtest_begin;
 extern const int __mtest_end;
 #endif
@@ -42,7 +42,7 @@ struct test_suites
     const char* suites_name;
     int suites_index;
     int test_num;
-    unsigned int comsum_ms;
+    unsigned int consum_tick;
 };
 
 struct test_suites_cache
@@ -50,12 +50,6 @@ struct test_suites_cache
     struct test_suites* suites;
     int suites_cnt;
     unsigned int test_cnt;
-};
-
-struct mtest_commond
-{
-    const char* cmd;
-    int (*cmd_entry)(int argc, char** argv);
 };
 
 struct uint_test_cache
@@ -167,7 +161,7 @@ static void mtest_prepare(void)
 static int mtest_run_suites(const char* name, int count)
 {
     int i, res;
-    unsigned int start, comsum_ms;
+    unsigned int start, consum_tick;
     struct test_suites* suites = NULL;
     for (i = 0; i < suites_cache.suites_cnt; i++)
     {
@@ -186,19 +180,19 @@ static int mtest_run_suites(const char* name, int count)
             MTEST_PRINT_NORMOL("[ RUN      ] %s.%s.\n", tests_cache.test[i]->name, tests_cache.test[i]->desc);
             start = MTEST_GET_TICK;
             res = tests_cache.test[i]->test_entry();
-            comsum_ms = MTEST_GET_TICK - start;
+            consum_tick = MTEST_GET_TICK - start;
             if (!res)
             {
-                MTEST_PRINT_NORMOL("[       OK ] %s.%s. (%d tick).\n", tests_cache.test[i]->name, tests_cache.test[i]->desc, comsum_ms);
+                MTEST_PRINT_NORMOL("[       OK ] %s.%s. (%d tick).\n", tests_cache.test[i]->name, tests_cache.test[i]->desc, consum_tick);
             }
             else
             {
-                MTEST_PRINT_ERROR("[  FAILED  ] %s.%s (%d tick).\n", tests_cache.test[i]->name, tests_cache.test[i]->desc, comsum_ms);
+                MTEST_PRINT_ERROR("[  FAILED  ] %s.%s (%d tick).\n", tests_cache.test[i]->name, tests_cache.test[i]->desc, consum_tick);
             }
-            suites_cache.suites[suites->suites_index].comsum_ms += comsum_ms;
+            suites->consum_tick += consum_tick;
         }
-        MTEST_PRINT_NORMOL("[==========] Running %d tests from %s (%d tick total).\n", suites->test_num, suites->suites_name, suites_cache.suites[suites->suites_index].comsum_ms);
-        suites_cache.suites[suites->suites_index].comsum_ms = 0;
+        MTEST_PRINT_NORMOL("[==========] Running %d tests from %s (%d tick total).\n", suites->test_num, suites->suites_name, suites->consum_tick);
+        suites->consum_tick = 0;
     }
 
     return suites ? 0 : -1;
@@ -207,7 +201,7 @@ static int mtest_run_suites(const char* name, int count)
 static int mtest_run_all(int count)
 {
     int i, res;
-    unsigned int start, comsum_ms;
+    unsigned int start, consum_tick;
     static int index = 0, end = 0;
     while (count--)
     {
@@ -221,19 +215,19 @@ static int mtest_run_all(int count)
                 MTEST_PRINT_NORMOL("[ RUN      ] %s.%s.\n", tests_cache.test[index]->name, tests_cache.test[index]->desc);
                 start = MTEST_GET_TICK;
                 res = tests_cache.test[i]->test_entry();
-                comsum_ms = MTEST_GET_TICK - start;
+                consum_tick = MTEST_GET_TICK - start;
                 if(!res)
                 {
-                    MTEST_PRINT_NORMOL("[       OK ] %s.%s. (%d tick).\n", tests_cache.test[index]->name, tests_cache.test[index]->desc, comsum_ms);
+                    MTEST_PRINT_NORMOL("[       OK ] %s.%s. (%d tick).\n", tests_cache.test[index]->name, tests_cache.test[index]->desc, consum_tick);
                 }
                 else
                 {
-                    MTEST_PRINT_ERROR("[  FAILED  ] %s.%s (%d tick).\n", tests_cache.test[i]->name, tests_cache.test[i]->desc, comsum_ms);
+                    MTEST_PRINT_ERROR("[  FAILED  ] %s.%s (%d tick).\n", tests_cache.test[i]->name, tests_cache.test[i]->desc, consum_tick);
                 }
-                suites_cache.suites[i].comsum_ms += comsum_ms;
+                suites_cache.suites[i].consum_tick += consum_tick;
             }
-            MTEST_PRINT_NORMOL("[----------] %d tests from %s (%d tick total).\n", suites_cache.suites[i].test_num, suites_cache.suites[i].suites_name, suites_cache.suites[i].comsum_ms);
-            suites_cache.suites[i].comsum_ms = 0;
+            MTEST_PRINT_NORMOL("[----------] %d tests from %s (%d tick total).\n", suites_cache.suites[i].test_num, suites_cache.suites[i].suites_name, suites_cache.suites[i].consum_tick);
+            suites_cache.suites[i].consum_tick = 0;
         }
         end = index = 0;
     }

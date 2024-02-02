@@ -26,7 +26,7 @@ struct uint_test
 #define WHITE    "37"
 
 #define MTEST_PRINTF                        printf
-#define MTEST_GET_TICK                      0 
+#define MTEST_GET_TICK                      0
 #define MTEST_MALLOC                        malloc
 #define MTEST_FREE                          free
 
