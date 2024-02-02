@@ -85,3 +85,23 @@ cd bin
 [  FAILED  ] xx_module.open_test (0 tick).
 [==========] Running 3 tests from xx_module (0 tick total).
 ```
+
+## 移植
+### gcc
+在链接脚本中新增 Section，如下
+```
+  .user :{
+    . = ALIGN(4);
+    __mtest_begin = .;
+    KEEP(*(Mtest))
+    __mtest_end = .;
+  }
+```
+### msvc
+直接加入主工程即可
+
+### armcc
+暂不支持
+
+
+> 目前仅支持 gcc 与 msvc
