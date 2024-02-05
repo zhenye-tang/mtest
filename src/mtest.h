@@ -64,9 +64,9 @@ struct uint_test
         } \
     } while(0);
 
-#define EXPECT_STR_COMPARE(s1, s2, ne, cmp) \
+#define EXPECT_STR_COMPARE(s1, s2, ops, ne) \
     do {   \
-        if (!cmp(s1, s2)) {                     \
+        if (!ops(s1, s2)) {                     \
             MTEST_COMPARE(ne) \
         } else { \
             MTEST_COMPARE(!ne) \
@@ -83,16 +83,16 @@ struct uint_test
     }while(0)
 
 #define EXPECT_STREQ(s1, s2) \
-    EXPECT_STR_COMPARE(s1, s2, 1, strcmp)
+    EXPECT_STR_COMPARE(s1, s2, strcmp, 1)
 
 #define EXPECT_STRNE(s1, s2) \
-    EXPECT_STR_COMPARE(s1, s2, 0, strcmp)
+    EXPECT_STR_COMPARE(s1, s2, strcmp, 0)
 
 #define EXPECT_STRCASEEQ(s1, s2) \
-    EXPECT_STR_COMPARE(s1, s2, 1, strcasecmp)
+    EXPECT_STR_COMPARE(s1, s2, strcasecmp, 1)
 
 #define EXPECT_STRCASENE(s1, s2) \
-    EXPECT_STR_COMPARE(s1, s2, 0, strcasecmp)
+    EXPECT_STR_COMPARE(s1, s2, strcasecmp, 0)
 
 #define EXPECT_EQ(val1, val2) \
     EXPECT_INTERGER_COMPARE(val1, val2, ==, 1);

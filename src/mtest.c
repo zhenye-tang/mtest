@@ -60,8 +60,6 @@ struct uint_test_cache
 
 typedef int (*iterator_call)(const struct uint_test* item);
 
-static const struct uint_test* mtest_begin_object;
-static const struct uint_test* mtest_end_object;
 static struct test_suites_cache suites_cache;
 static struct uint_test_cache tests_cache;
 
@@ -130,6 +128,8 @@ static int mtest_cache_tests(const struct uint_test* item)
 
 static void mtest_prepare(void)
 {
+    static const struct uint_test* mtest_begin_object;
+    static const struct uint_test* mtest_end_object;
     static char prepared = 0;
     if (prepared)
         return;
