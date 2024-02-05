@@ -7,17 +7,17 @@ Mtest (micro testcase) 是一个占用资源小的单元测试框架，兼容 gt
 
 ```
 mtest
-├─── examples							// 示例
-|       |———0.lds                       // gcc 链接脚本
-|       |———CMakeLists.txt              // cmake 文件
-|       └───testcase_0.c                // 单元测试示例
-├─── src                                // mtest 源码
-|     |———mtest.c                       // mtest 源文件
-|     |———mtest.h                       // mtest 头文件
-|     └───CMakeLists.txt                // cmake 文件
-├─── CMakeLists.txt						// cmake 文件
-├─── SConscript                         // scons 文件
-└─── README.md                          // 软件说明文件
+├─── examples                 		// 示例
+|       |———0.lds             		// gcc 链接脚本
+|       |———CMakeLists.txt    		// cmake 文件
+|       └───testcase_0.c      		// 单元测试示例
+├─── src                      		// mtest 源码
+|     |———mtest.c             		// mtest 源文件
+|     |———mtest.h             		// mtest 头文件
+|     └───CMakeLists.txt      		// cmake 文件
+├─── CMakeLists.txt		        // cmake 文件
+├─── SConscript               		// scons 文件
+└─── README.md                		// 软件说明文件
 ```
 
 ## API 介绍
@@ -87,10 +87,21 @@ cd bin
 ```
 
 ## 移植
+
+**mtest.h** 文件中适配如下宏
+
+```c
+#define MTEST_PRINTF       printf  // 用于输出结果
+#define MTEST_GET_TICK     0       // 用于测量每个测试用例消耗的时间，tick 为单位
+#define MTEST_MALLOC       malloc  // 用于申请内存
+#define MTEST_FREE         free    // 用于释放内存
+```
+
 ### gcc
+
 在链接脚本中新增 Section，如下
 ```
-.user :{
+.Mtest :{
 . = ALIGN(4);
 __mtest_begin = .;
 KEEP(*(Mtest))
