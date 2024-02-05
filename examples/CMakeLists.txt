@@ -2,9 +2,9 @@ project(example)
 
 file(GLOB SOURCES *.c)
 
+set(CUSTOM_LINKER_SCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/0.lds")
 set(CMAKE_C_COMPILER "/usr/bin/gcc")
 set(CMAKE_CXX_COMPILER "/usr/bin/g++")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -O0 -Wl,-Map=Mtest.map")
 
 message(STATUS ${CUSTOM_LINKER_SCRIPT_PATH})
 # Generate executable
