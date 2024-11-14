@@ -7,17 +7,17 @@ Mtest (micro testcase) 是一个占用资源小的单元测试框架，兼容 gt
 
 ```
 mtest
-├─── examples                 		// 示例
-|       |———0.lds             		// gcc 链接脚本
-|       |———CMakeLists.txt    		// cmake 文件
-|       └───testcase_0.c      		// 单元测试示例
-├─── src                      		// mtest 源码
-|     |———mtest.c             		// mtest 源文件
-|     |———mtest.h             		// mtest 头文件
-|     └───CMakeLists.txt      		// cmake 文件
-├─── CMakeLists.txt		        // cmake 文件
-├─── SConscript               		// scons 文件
-└─── README.md                		// 软件说明文件
+├─── examples                       // 示例
+|       |———0.lds                   // gcc 链接脚本
+|       |———CMakeLists.txt          // cmake 文件
+|       └───testcase_0.c            // 单元测试示例
+├─── src                            // mtest 源码
+|     |———mtest.c                   // mtest 源文件
+|     |———mtest.h                   // mtest 头文件
+|     └───CMakeLists.txt            // cmake 文件
+├─── CMakeLists.txt                 // cmake 文件
+├─── SConscript                     // scons 文件
+└─── README.md                      // 软件说明文件
 ```
 
 ## API 介绍
